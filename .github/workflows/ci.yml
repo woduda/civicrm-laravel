@@ -33,6 +33,8 @@ jobs:
           coverage: none
 
       - name: Install dependencies
+        env:
+          COMPOSER_NO_AUDIT: 1
         run: >
           composer update --no-interaction --prefer-dist --prefer-stable
           --with="illuminate/contracts:^${{ matrix.laravel }}"

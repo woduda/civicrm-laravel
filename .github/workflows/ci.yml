@@ -35,11 +35,12 @@ jobs:
       - name: Install dependencies
         env:
           COMPOSER_NO_AUDIT: 1
-        run: >
-          composer update --no-interaction --prefer-dist --prefer-stable
-          --with="illuminate/contracts:^${{ matrix.laravel }}"
-          --with="illuminate/support:^${{ matrix.laravel }}"
-          --with="orchestra/testbench:${{ matrix.testbench }}"
+        run: |
+          composer config --global policy.advisories.block false
+          composer update --no-interaction --prefer-dist --prefer-stable \
+            --with="illuminate/contracts:^${{ matrix.laravel }}" \
+            --with="illuminate/support:^${{ matrix.laravel }}" \
+            --with="orchestra/testbench:${{ matrix.testbench }}"
 
       - name: Run QA
         run: composer qa

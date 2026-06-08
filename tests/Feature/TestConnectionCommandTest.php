@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Http\Mock\Client as MockClient;
-use Illuminate\Testing\PendingCommand;
+use Illuminate\Support\Facades\Artisan;
 use Nyholm\Psr7\Response;
 use Psr\Http\Client\ClientInterface;
 
@@ -24,22 +24,6 @@ function civiErrorResponse(int $status): Response
     ], JSON_THROW_ON_ERROR));
 }
 
-/**
- * Runs an artisan command with console output mocked (the default in TestCase)
- * and returns a {@see PendingCommand} for fluent assertions.
- *
- * @throws \RuntimeException When console output mocking is disabled unexpectedly
- */
-function runArtisan(string $command): PendingCommand
-{
-    $result = test()->artisan($command);
-    if (!$result instanceof PendingCommand) {
-        throw new \RuntimeException('artisan() returned int; ensure withoutMockingConsoleOutput() is not active');
-    }
-
-    return $result;
-}
-
 beforeEach(function (): void {
     config([
         'civicrm.base_url'  => 'https://example.org/civicrm/ajax/api4/',
@@ -52,9 +36,10 @@ it('returns exit code 0 on a successful connection', function (): void {
     $mock->addResponse(civiSuccessResponse());
     app()->bind(ClientInterface::class, static fn() => $mock);
 
-    runArtisan('civicrm:test-connection')
-        ->assertExitCode(0)
-        ->expectsOutputToContain('OK');
+    $code = Artisan::call('civicrm:test-connection');
+
+    expect($code)->toBe(0)
+        ->and(Artisan::output())->toContain('OK');
 });
 
 it('returns non-zero exit code on HTTP 401', function (): void {
@@ -62,9 +47,10 @@ it('returns non-zero exit code on HTTP 401', function (): void {
     $mock->addResponse(civiErrorResponse(401));
     app()->bind(ClientInterface::class, static fn() => $mock);
 
-    runArtisan('civicrm:test-connection')
-        ->assertExitCode(1)
-        ->expectsOutputToContain('API error');
+    $code = Artisan::call('civicrm:test-connection');
+
+    expect($code)->toBe(1)
+        ->and(Artisan::output())->toContain('API error');
 });
 
 it('returns non-zero exit code on HTTP 500', function (): void {
@@ -72,7 +58,8 @@ it('returns non-zero exit code on HTTP 500', function (): void {
     $mock->addResponse(civiErrorResponse(500));
     app()->bind(ClientInterface::class, static fn() => $mock);
 
-    runArtisan('civicrm:test-connection')
-        ->assertExitCode(1)
-        ->expectsOutputToContain('API error');
+    $code = Artisan::call('civicrm:test-connection');
+
+    expect($code)->toBe(1)
+        ->and(Artisan::output())->toContain('API error');
 });

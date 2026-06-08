@@ -7,8 +7,6 @@ use Illuminate\Testing\PendingCommand;
 use Nyholm\Psr7\Response;
 use Psr\Http\Client\ClientInterface;
 
-use function Pest\Laravel\artisan;
-
 function civiSuccessResponse(): Response
 {
     return new Response(200, [], json_encode([
@@ -34,7 +32,7 @@ function civiErrorResponse(int $status): Response
  */
 function runArtisan(string $command): PendingCommand
 {
-    $result = artisan($command);
+    $result = test()->artisan($command);
     if (!$result instanceof PendingCommand) {
         throw new \RuntimeException('artisan() returned int; ensure withoutMockingConsoleOutput() is not active');
     }

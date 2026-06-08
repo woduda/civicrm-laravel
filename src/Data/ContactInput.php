@@ -99,6 +99,37 @@ final readonly class ContactInput
     }
 
     /**
+     * Serialises the DTO to an associative array for outbox storage.
+     *
+     * This is the inverse of {@see fromArray()} — the round-trip
+     * `ContactInput::fromArray($input->toArray())` is lossless.
+     *
+     * @return array{
+     *     externalIdentifier: string|null,
+     *     email: string|null,
+     *     firstName: string,
+     *     lastName: string,
+     *     organizationName: string|null,
+     *     extraFields: array<string, mixed>,
+     *     tags: list<string>,
+     *     groups: list<string>,
+     * }
+     */
+    public function toArray(): array
+    {
+        return [
+            'externalIdentifier' => $this->externalIdentifier,
+            'email'              => $this->email,
+            'firstName'          => $this->firstName,
+            'lastName'           => $this->lastName,
+            'organizationName'   => $this->organizationName,
+            'extraFields'        => $this->extraFields,
+            'tags'               => $this->tags,
+            'groups'             => $this->groups,
+        ];
+    }
+
+    /**
      * Returns the standard CiviCRM contact field values for create/update calls.
      *
      * Excludes email, externalIdentifier, tags, groups, and extraFields — those are

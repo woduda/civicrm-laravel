@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        /** @var string $table */
+        $table = config('civicrm.outbox.table', 'civicrm_outbox');
+
+        Schema::create($table, function (Blueprint $t): void {
+            $t->bigIncrements('id');
+            $t->char('uuid', 36)->unique();
+            $t->string('type');
+            $t->json('payload');
+            $t->string('dedupe_key')->nullable()->unique();
+            $t->string('status')->default('pending');
+            $t->unsignedInteger('attempts')->default(0);
+            $t->timestamp('available_at')->index();
+            $t->timestamp('reserved_at')->nullable();
+            $t->timestamp('processed_at')->nullable();
+            $t->text('last_error')->nullable();
+            $t->timestamps();
+            $t->index(['status', 'available_at']);
+        });
+    }
+
+    public function down(): void
+    {
+        /** @var string $table */
+        $table = config('civicrm.outbox.table', 'civicrm_outbox');
+
+        Schema::dropIfExists($table);
+    }
+};

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace CiviCrm\Laravel;
 
+use CiviCrm\Laravel\Console\ProcessOutboxCommand;
 use CiviCrm\Laravel\Console\TestConnectionCommand;
+use CiviCrm\Laravel\Outbox\OutboxRepository;
 use CiviCrm\Laravel\Exception\ConfigurationException;
 use Illuminate\Contracts\Foundation\Application;
 use Psr\Http\Client\ClientInterface;
@@ -22,6 +24,7 @@ class CiviCrmServiceProvider extends PackageServiceProvider
         $package
             ->name('civicrm-laravel')
             ->hasConfigFile('civicrm')
+            ->hasMigration('create_civicrm_outbox_table')
             ->hasCommands([TestConnectionCommand::class]);
     }
 
@@ -49,6 +52,15 @@ class CiviCrmServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(CiviCrmClient::class, fn(Application $app): CiviCrmClient => $this->buildClient($app));
         $this->app->alias(CiviCrmClient::class, 'civicrm');
+    }
+
+    public function packageBooted(): void
+    {
+        if (config('civicrm.outbox.enabled')) {
+            $this->commands([ProcessOutboxCommand::class]);
+        }
+
+        $this->app->singleton(OutboxRepository::class);
     }
 
     private function buildClient(Application $app): CiviCrmClient

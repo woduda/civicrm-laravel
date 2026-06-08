@@ -119,6 +119,71 @@ dispatch(new CreateActivityJob(
 > a duplicate may be created. Full deduplication via a persistent `dedupe_key` column
 > is planned for LPR #3 (transactional outbox).
 
+## Transactional Outbox
+
+The outbox guarantees that CiviCRM side-effects are persisted atomically alongside domain model changes — no distributed transaction required. A drain command picks up and executes pending entries.
+
+### 1. Enable and publish the migration
+
+In `.env` (or `config/civicrm.php`):
+
+```dotenv
+CIVICRM_OUTBOX=true
+```
+
+Publish and run the migration:
+
+```bash
+php artisan vendor:publish --tag=civicrm-laravel-migrations
+php artisan migrate
+```
+
+### 2. Write to the outbox inside a DB transaction
+
+```php
+use CiviCrm\Laravel\Data\ContactInput;
+use CiviCrm\Laravel\Outbox\OutboxRepository;
+use Illuminate\Support\Facades\DB;
+
+DB::transaction(function () use ($outbox, $contactInput): void {
+    // Save your domain model here …
+    $domain->save();
+
+    // … then enqueue the CiviCRM side-effect in the same transaction.
+    $outbox->pushSyncContact($contactInput);
+});
+```
+
+If the transaction rolls back the outbox entry is discarded with it. If it commits, `civicrm:outbox:work` will pick it up.
+
+### 3. Register the drain command in the scheduler
+
+```php
+// routes/console.php or App\Console\Kernel::schedule()
+$schedule->command('civicrm:outbox:work')->everyMinute();
+```
+
+The command is idempotent and safe to overlap — row-level locking in `reserveBatch()` prevents duplicate processing.
+
+### Available push helpers
+
+| Method | Description |
+|---|---|
+| `pushSyncContact(ContactInput $input)` | Enqueues a contact upsert; dedupe key derived from `externalIdentifier` or `email` |
+| `pushCreateActivity(int $contactId, string $type, array $params, ?string $dedupeKey)` | Enqueues an activity; pass an explicit `$dedupeKey` for at-least-once safety |
+| `push(string $type, array $payload, ?string $dedupeKey)` | Raw push for custom entry types |
+
+### Drain command options
+
+```
+php artisan civicrm:outbox:work [--limit=100] [--max-attempts=5]
+```
+
+- `--limit` — maximum entries processed per run (default 100)
+- `--max-attempts` — attempts before permanent failure (default 5); exponential backoff capped at 3600 s
+
+`ValidationException` and `AuthenticationException` (when available) cause immediate permanent failure without retry.
+
 ## Configuration reference
 
 All options live in `config/civicrm.php` after publishing. The most important keys:

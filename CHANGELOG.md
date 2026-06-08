@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-08
+
+### Added
+- Transactional outbox — `OutboxEntry` Eloquent model, `OutboxRepository` with `push()` /
+  `pushSyncContact()` / `pushCreateActivity()` / `reserveBatch()` / `markDone()` / `markFailed()`;
+  `push()` deliberately opens no transaction of its own so callers can include it in their domain
+  `DB::transaction()` for atomicity
+- `civicrm:outbox:work` artisan command — drains pending outbox entries synchronously;
+  supports `--limit` and `--max-attempts`; exponential backoff (capped at 3600 s);
+  `ValidationException` and `AuthenticationException` (forward-compat guard) cause immediate
+  permanent failure; idempotent and overlap-safe via row-level locking in `reserveBatch()`
+- `create_civicrm_outbox_table` migration stub — publishable via
+  `vendor:publish --tag=civicrm-laravel-migrations`; table name configurable via
+  `civicrm.outbox.table`; columns include `dedupe_key` (nullable unique), `status`
+  (pending/processing/done/failed), `attempts`, `available_at`, `last_error`
+- `ContactInput::toArray()` — lossless inverse of `fromArray()`, used by outbox serialisation
+
 ### Added
 - `ContactInput` DTO (`CiviCrm\Laravel\Data\ContactInput`) — serialisable payload for
   contact sync jobs; requires at least one of `email` or `externalIdentifier`; validates

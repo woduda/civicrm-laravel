@@ -1,0 +1,65 @@
+{
+    "name": "woduda/civicrm-laravel",
+    "description": "Thin Laravel adapter around woduda/civicrm-php (PSR-18 CiviCRM APIv4 client)",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "woduda/civicrm-php": "^0.7",
+        "illuminate/contracts": "^11|^12|^13",
+        "illuminate/support": "^11|^12|^13",
+        "spatie/laravel-package-tools": "^1.16",
+        "symfony/yaml": "^7|^8"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9|^10|^11",
+        "pestphp/pest": "^3",
+        "pestphp/pest-plugin-laravel": "^3",
+        "larastan/larastan": "^3",
+        "phpstan/phpstan": "^2",
+        "laravel/pint": "^1.18",
+        "rector/rector": "^2",
+        "php-http/mock-client": "*",
+        "nyholm/psr7": "^1",
+        "guzzlehttp/guzzle": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "CiviCrm\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CiviCrm\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "cs": "pint",
+        "cs:check": "pint --test",
+        "phpstan": "phpstan analyse",
+        "rector": "rector --dry-run",
+        "test": "pest",
+        "qa": [
+            "@cs:check",
+            "@phpstan",
+            "@rector",
+            "@test"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CiviCrm\\Laravel\\CiviCrmServiceProvider"
+            ],
+            "aliases": {
+                "CiviCrm": "CiviCrm\\Laravel\\Facades\\CiviCrm"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    }
+}

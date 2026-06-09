@@ -117,6 +117,24 @@ final readonly class SchemaApplier
             );
         }
 
+        foreach ($schema->contactTypes as $def) {
+            $this->processEntity(
+                label: "ContactType:{$def->name}",
+                exists: $this->entityExists('ContactType', 'name', $def->name),
+                dryRun: $dryRun,
+                created: $created,
+                existing: $existing,
+                wouldCreate: $wouldCreate,
+                create: function () use ($def): void {
+                    $this->client->entity('ContactType')->create([
+                        'name'           => $def->name,
+                        'label'          => $def->label ?? $def->name,
+                        'parent_id:name' => $def->parentName,
+                    ]);
+                },
+            );
+        }
+
         foreach ($schema->customGroups as $groupDef) {
             $groupId = $this->resolveCustomGroup(
                 def: $groupDef,

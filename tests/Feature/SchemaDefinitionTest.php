@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use CiviCrm\Laravel\Schema\ContactTypeDef;
 use CiviCrm\Laravel\Schema\CustomGroupDef;
 use CiviCrm\Laravel\Schema\RelationshipTypeDef;
 use CiviCrm\Laravel\Schema\SchemaDefinition;
@@ -64,7 +65,8 @@ it('handles all sections being omitted', function (): void {
         ->and($schema->activityTypes)->toBe([])
         ->and($schema->relationshipTypes)->toBe([])
         ->and($schema->optionValues)->toBe([])
-        ->and($schema->groups)->toBe([]);
+        ->and($schema->groups)->toBe([])
+        ->and($schema->contactTypes)->toBe([]);
 });
 
 it('throws ValidationException when customGroups entry is missing name', function (): void {
@@ -110,6 +112,39 @@ it('throws ValidationException when customField is missing label', function (): 
         ],
     ]);
 })->throws(ValidationException::class, 'label');
+
+it('parses contactTypes section', function (): void {
+    $schema = SchemaDefinition::fromArray([
+        'contactTypes' => [
+            ['name' => 'Volunteer', 'parentName' => 'Individual', 'label' => 'Volunteer'],
+            ['name' => 'Foundation', 'parentName' => 'Organization'],
+        ],
+    ]);
+
+    expect($schema->contactTypes)->toHaveCount(2)
+        ->and($schema->contactTypes[0])->toBeInstanceOf(ContactTypeDef::class)
+        ->and($schema->contactTypes[0]->name)->toBe('Volunteer')
+        ->and($schema->contactTypes[0]->parentName)->toBe('Individual')
+        ->and($schema->contactTypes[0]->label)->toBe('Volunteer')
+        ->and($schema->contactTypes[1]->name)->toBe('Foundation')
+        ->and($schema->contactTypes[1]->label)->toBeNull();
+});
+
+it('throws ValidationException when contactTypes entry is missing name', function (): void {
+    SchemaDefinition::fromArray([
+        'contactTypes' => [['parentName' => 'Individual']],
+    ]);
+})->throws(ValidationException::class, 'name');
+
+it('throws ValidationException when contactTypes entry is missing parentName', function (): void {
+    SchemaDefinition::fromArray([
+        'contactTypes' => [['name' => 'Volunteer']],
+    ]);
+})->throws(ValidationException::class, 'parentName');
+
+it('throws ValidationException when contactTypes section is not a list', function (): void {
+    SchemaDefinition::fromArray(['contactTypes' => 'not-a-list']);
+})->throws(ValidationException::class, 'contactTypes');
 
 it('parses optionValues section', function (): void {
     $schema = SchemaDefinition::fromArray([

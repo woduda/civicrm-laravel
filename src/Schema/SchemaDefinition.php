@@ -20,6 +20,7 @@ final readonly class SchemaDefinition
      * @param list<RelationshipTypeDef> $relationshipTypes
      * @param list<OptionValueDef>      $optionValues
      * @param list<string>              $groups
+     * @param list<ContactTypeDef>      $contactTypes
      */
     public function __construct(
         public array $customGroups = [],
@@ -28,6 +29,7 @@ final readonly class SchemaDefinition
         public array $relationshipTypes = [],
         public array $optionValues = [],
         public array $groups = [],
+        public array $contactTypes = [],
     ) {}
 
     /**
@@ -43,6 +45,7 @@ final readonly class SchemaDefinition
             relationshipTypes: self::parseRelationshipTypes($data),
             optionValues: self::parseOptionValues($data),
             groups: self::parseStringList($data, 'groups'),
+            contactTypes: self::parseContactTypes($data),
         );
     }
 
@@ -122,6 +125,33 @@ final readonly class SchemaDefinition
                 );
             }
             $result[] = OptionValueDef::fromArray($entry);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<mixed, mixed> $data
+     * @return list<ContactTypeDef>
+     */
+    private static function parseContactTypes(array $data): array
+    {
+        if (!array_key_exists('contactTypes', $data)) {
+            return [];
+        }
+
+        if (!is_array($data['contactTypes'])) {
+            throw new ValidationException('Schema section "contactTypes" must be a list.');
+        }
+
+        $result = [];
+        foreach ($data['contactTypes'] as $i => $entry) {
+            if (!is_array($entry)) {
+                throw new ValidationException(
+                    sprintf('Schema "contactTypes[%s]" must be an object/mapping.', (string) $i),
+                );
+            }
+            $result[] = ContactTypeDef::fromArray($entry);
         }
 
         return $result;

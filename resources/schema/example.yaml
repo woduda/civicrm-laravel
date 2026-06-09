@@ -43,3 +43,9 @@ activityTypes:
 # Smart groups / mailing lists.
 groups:
   - Marketing consent
+
+# Contact sub-types — must reference a base type (Individual, Organization, Household).
+contactTypes:
+  - name: Wolontariusz
+    parentName: Individual
+    label: Wolontariusz

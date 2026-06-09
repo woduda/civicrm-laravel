@@ -15,9 +15,10 @@ use Woduda\CiviCRM\Exception\ValidationException;
 final readonly class ContactInput
 {
     /**
-     * @param array<string, mixed> $extraFields  Custom fields keyed as "GroupName.field_name"
-     * @param list<string>         $tags         Tag names to assign after upsert
-     * @param list<string>         $groups       Group titles to assign after upsert
+     * @param array<string, mixed> $extraFields    Custom fields keyed as "GroupName.field_name"
+     * @param list<string>         $tags           Tag names to assign after upsert
+     * @param list<string>         $groups         Group titles to assign after upsert
+     * @param string|null          $contactSubType CiviCRM contact sub-type name (e.g. "Volunteer")
      *
      * @throws ValidationException if neither email nor externalIdentifier is provided
      */
@@ -30,6 +31,7 @@ final readonly class ContactInput
         public array $extraFields = [],
         public array $tags = [],
         public array $groups = [],
+        public ?string $contactSubType = null,
     ) {
         if ($this->externalIdentifier === null && $this->email === null) {
             throw new ValidationException(
@@ -42,7 +44,7 @@ final readonly class ContactInput
      * Named constructor from an associative array.
      *
      * Accepted keys: externalIdentifier, email, firstName, lastName,
-     * organizationName, extraFields, tags, groups.
+     * organizationName, extraFields, tags, groups, contactSubType.
      *
      * @param array<string, mixed> $data
      *
@@ -73,6 +75,9 @@ final readonly class ContactInput
             groups: isset($data['groups']) && is_array($data['groups'])
                 ? array_values(array_filter($data['groups'], is_string(...)))
                 : [],
+            contactSubType: isset($data['contactSubType']) && is_string($data['contactSubType'])
+                ? $data['contactSubType']
+                : null,
         );
     }
 
@@ -113,6 +118,7 @@ final readonly class ContactInput
      *     extraFields: array<string, mixed>,
      *     tags: list<string>,
      *     groups: list<string>,
+     *     contactSubType: string|null,
      * }
      */
     public function toArray(): array
@@ -126,6 +132,7 @@ final readonly class ContactInput
             'extraFields'        => $this->extraFields,
             'tags'               => $this->tags,
             'groups'             => $this->groups,
+            'contactSubType'     => $this->contactSubType,
         ];
     }
 
@@ -151,6 +158,10 @@ final readonly class ContactInput
 
         if ($this->organizationName !== null) {
             $values['organization_name'] = $this->organizationName;
+        }
+
+        if ($this->contactSubType !== null) {
+            $values['contact_sub_type'] = $this->contactSubType;
         }
 
         return $values;

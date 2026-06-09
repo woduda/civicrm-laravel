@@ -239,6 +239,59 @@ it('dry-run marks group and all fields as wouldCreate when group does not exist'
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Contact types
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('creates a contact type when it does not exist', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('ContactType', 'get', [], 0);
+    $transport->addResponse('ContactType', 'create', [['id' => 9]], 1);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(SchemaDefinition::fromArray([
+        'contactTypes' => [
+            ['name' => 'Volunteer', 'parentName' => 'Individual'],
+        ],
+    ]));
+
+    expect($report->created)->toBe(['ContactType:Volunteer'])
+        ->and($transport->callsFor('ContactType', 'create'))->toHaveCount(1);
+});
+
+it('reports existing when contact type already exists', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('ContactType', 'get', [['id' => 9]], 1);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(SchemaDefinition::fromArray([
+        'contactTypes' => [
+            ['name' => 'Volunteer', 'parentName' => 'Individual'],
+        ],
+    ]));
+
+    expect($report->existing)->toBe(['ContactType:Volunteer'])
+        ->and($transport->callsFor('ContactType', 'create'))->toHaveCount(0);
+});
+
+it('dry-run does not call create for a missing contact type', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('ContactType', 'get', [], 0);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(
+        SchemaDefinition::fromArray([
+            'contactTypes' => [
+                ['name' => 'Foundation', 'parentName' => 'Organization', 'label' => 'Foundation'],
+            ],
+        ]),
+        dryRun: true,
+    );
+
+    expect($report->wouldCreate)->toBe(['ContactType:Foundation'])
+        ->and($transport->callsFor('ContactType', 'create'))->toHaveCount(0);
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Report helpers
 // ──────────────────────────────────────────────────────────────────────────────
 

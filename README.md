@@ -73,7 +73,7 @@ dispatch(new SyncContactJob(ContactInput::fromArray([
     'lastName'  => 'Smith',
 ])));
 
-// Full — match by externalIdentifier, with tags, groups, and custom fields
+// Full — match by externalIdentifier, with tags, groups, custom fields, and contact sub-type
 dispatch(new SyncContactJob(new ContactInput(
     externalIdentifier: 'crm-alice-001',
     email:              'alice@example.org',
@@ -82,6 +82,7 @@ dispatch(new SyncContactJob(new ContactInput(
     tags:               ['Donor', 'VIP'],
     groups:             ['Newsletter', 'Events'],
     extraFields:        ['Wolontariat.volunteer_status' => 'active'],
+    contactSubType:     'Volunteer',
 )));
 ```
 
@@ -251,6 +252,12 @@ optionValues:
 # Smart groups / mailing lists
 groups:
   - Marketing consent
+
+# Contact sub-types (must reference a base type: Individual, Organization, or Household)
+contactTypes:
+  - name: Volunteer              # machine name
+    parentName: Individual       # base type
+    label: Volunteer             # optional; defaults to name
 ```
 
 All entities are created via **get-or-create** — running the command twice is safe.

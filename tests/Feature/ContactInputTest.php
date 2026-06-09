@@ -106,6 +106,36 @@ it('includes organization_name when set', function (): void {
     expect($input->toCiviValues())->toHaveKey('organization_name', 'ACME');
 });
 
+it('includes contact_sub_type in toCiviValues when set', function (): void {
+    $input = new ContactInput(email: 'a@b.com', contactSubType: 'Wolontariusz');
+
+    expect($input->toCiviValues())->toHaveKey('contact_sub_type', 'Wolontariusz');
+});
+
+it('omits contact_sub_type from toCiviValues when null', function (): void {
+    $input = new ContactInput(email: 'a@b.com');
+
+    expect($input->toCiviValues())->not->toHaveKey('contact_sub_type');
+});
+
+it('parses contactSubType from fromArray', function (): void {
+    $input = ContactInput::fromArray(['email' => 'a@b.com', 'contactSubType' => 'Wolontariusz']);
+
+    expect($input->contactSubType)->toBe('Wolontariusz');
+});
+
+it('contactSubType is null when absent from fromArray', function (): void {
+    $input = ContactInput::fromArray(['email' => 'a@b.com']);
+
+    expect($input->contactSubType)->toBeNull();
+});
+
+it('toArray round-trip preserves contactSubType', function (): void {
+    $input = new ContactInput(email: 'a@b.com', contactSubType: 'Wolontariusz');
+
+    expect(ContactInput::fromArray($input->toArray())->contactSubType)->toBe('Wolontariusz');
+});
+
 it('does not include email externalIdentifier tags groups or extraFields in toCiviValues', function (): void {
     $input = new ContactInput(
         externalIdentifier: 'ext-1',

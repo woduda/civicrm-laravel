@@ -184,6 +184,77 @@ php artisan civicrm:outbox:work [--limit=100] [--max-attempts=5]
 
 `ValidationException` and `AuthenticationException` (when available) cause immediate permanent failure without retry.
 
+## Schema (`civicrm:apply-schema`)
+
+Declare your CiviCRM schema in a YAML file and apply it idempotently with a single command.
+Each section is optional; unknown sections are ignored.
+
+### Quick start
+
+Copy `vendor/woduda/civicrm-laravel/resources/schema/example.yaml` to your app, adjust it,
+then run:
+
+```bash
+# Preview what would be created (no changes made)
+php artisan civicrm:apply-schema civicrm-schema.yaml --dry-run
+
+# Apply
+php artisan civicrm:apply-schema civicrm-schema.yaml
+```
+
+You can set a default path in `.env` so the `{file}` argument is optional:
+
+```dotenv
+CIVICRM_SCHEMA_PATH=/absolute/path/to/civicrm-schema.yaml
+```
+
+### YAML keys
+
+```yaml
+# Custom groups and their fields
+customGroups:
+  - name: VolunteerData          # machine name (snake_case or CamelCase)
+    title: Volunteer Data        # human label
+    extends: Contact             # default: Contact
+    fields:
+      - name: volunteer_status
+        label: Volunteer Status
+        dataType: String         # String | Integer | Date | Boolean | Memo | Money | Float | Link
+        htmlType: Select         # Text | Select | Radio | CheckBox | TextArea | Hidden | …
+        optionValues: [applied, active, inactive]   # inline options for Select/Radio
+        isRequired: false        # default: false
+
+# Bidirectional relationship types
+relationshipTypes:
+  - nameAToB: Reports to
+    nameBToA: Manages
+    labelAToB: Reports to
+    labelBToA: Manages
+    contactTypeA: Individual     # optional
+    contactTypeB: Individual     # optional
+
+# Tag names (used for contact tagging)
+tags:
+  - volunteer
+  - donor
+
+# Activity types (added to the built-in `activity_type` option group)
+activityTypes:
+  - Materials sent
+
+# Option values in arbitrary option groups
+optionValues:
+  - optionGroup: event_type
+    name: webinar
+    label: Webinar               # optional; defaults to name
+
+# Smart groups / mailing lists
+groups:
+  - Marketing consent
+```
+
+All entities are created via **get-or-create** — running the command twice is safe.
+
 ## Configuration reference
 
 All options live in `config/civicrm.php` after publishing. The most important keys:

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace CiviCrm\Laravel;
 
+use CiviCrm\Laravel\Console\ApplySchemaCommand;
 use CiviCrm\Laravel\Console\ProcessOutboxCommand;
 use CiviCrm\Laravel\Console\TestConnectionCommand;
-use CiviCrm\Laravel\Outbox\OutboxRepository;
 use CiviCrm\Laravel\Exception\ConfigurationException;
+use CiviCrm\Laravel\Outbox\OutboxRepository;
+use CiviCrm\Laravel\Schema\SchemaApplier;
 use Illuminate\Contracts\Foundation\Application;
 use Psr\Http\Client\ClientInterface;
 use Spatie\LaravelPackageTools\Package;
@@ -25,7 +27,7 @@ class CiviCrmServiceProvider extends PackageServiceProvider
             ->name('civicrm-laravel')
             ->hasConfigFile('civicrm')
             ->hasMigration('create_civicrm_outbox_table')
-            ->hasCommands([TestConnectionCommand::class]);
+            ->hasCommands([TestConnectionCommand::class, ApplySchemaCommand::class]);
     }
 
     public function packageRegistered(): void
@@ -52,6 +54,7 @@ class CiviCrmServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(CiviCrmClient::class, fn(Application $app): CiviCrmClient => $this->buildClient($app));
         $this->app->alias(CiviCrmClient::class, 'civicrm');
+        $this->app->singleton(SchemaApplier::class);
     }
 
     public function packageBooted(): void

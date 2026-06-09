@@ -56,4 +56,10 @@ return [
         'enabled' => env('CIVICRM_OUTBOX', false),
         'table'   => 'civicrm_outbox',
     ],
+
+    /*
+     * Declarative schema applier — path to the YAML schema file used by civicrm:apply-schema.
+     * Defaults to base_path('civicrm-schema.yaml') when not set.
+     */
+    'schema_path' => env('CIVICRM_SCHEMA_PATH', null),
 ];

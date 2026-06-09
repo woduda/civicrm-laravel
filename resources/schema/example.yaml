@@ -1,0 +1,45 @@
+# EXAMPLE — copy to your app and adjust.
+# Run: php artisan civicrm:apply-schema path/to/schema.yaml --dry-run
+
+customGroups:
+  - name: VolunteerData
+    title: Volunteer Data
+    extends: Contact
+    fields:
+      - name: volunteer_status
+        label: Volunteer Status
+        dataType: String
+        htmlType: Select
+        optionValues: [applied, active, inactive]
+        # Line manager is a relationship (see RelationshipType below), not a plain field.
+      - name: start_date
+        label: Start Date
+        dataType: Date
+        htmlType: Select
+      - name: line_manager_note
+        label: Line Manager Note
+        dataType: Memo
+        htmlType: TextArea
+
+# Bidirectional relationship types — use these instead of a plain custom field for
+# structured people-to-people connections (e.g. line management hierarchy).
+relationshipTypes:
+  - nameAToB: Reports to
+    nameBToA: Manages
+    labelAToB: Reports to
+    labelBToA: Manages
+    contactTypeA: Individual
+    contactTypeB: Individual
+
+tags:
+  - candidate
+  - volunteer
+  - donor
+
+# Activity types added to the built-in 'activity_type' option group.
+activityTypes:
+  - Materials sent
+
+# Smart groups / mailing lists.
+groups:
+  - Marketing consent

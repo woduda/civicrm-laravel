@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-09
+
+### Added
+- `civicrm:apply-schema {file?} {--dry-run}` artisan command — applies a YAML schema file
+  to the configured CiviCRM instance via idempotent get-or-create; supports dry-run mode that
+  prints what would be created without issuing any write calls; prints a summary table with
+  Status / Type / Name columns
+- `SchemaDefinition` DTO — parses and validates a YAML schema array; sections:
+  `customGroups[]`, `tags[]`, `activityTypes[]`, `relationshipTypes[]`, `optionValues[]`,
+  `groups[]`; all sections optional; throws `ValidationException` with a human-readable
+  message identifying the bad section/entry when the shape is invalid
+- `SchemaApplier` service — applies a `SchemaDefinition` via `entity()` calls; builds a
+  `SchemaApplyReport` that distinguishes created / existing / wouldCreate entries
+- `SchemaApplyReport` — immutable report DTO; `toTable()` method returns rows for Artisan's
+  `Command::table()` helper
+- Sub-DTOs: `CustomGroupDef`, `CustomFieldDef` (with inline `optionValues`),
+  `RelationshipTypeDef`, `OptionValueDef`
+- `resources/schema/example.yaml` — annotated example schema with a Volunteer Data custom
+  group, relationship types, tags, activity type, and group
+- `civicrm.schema_path` config key (`CIVICRM_SCHEMA_PATH` env) — default path for the
+  schema file when the `{file}` argument is omitted
+
 ## [0.2.0] — 2026-06-08
 
 ### Added

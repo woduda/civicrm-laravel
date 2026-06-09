@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-06-09
+
+### Added
+- `ContactTypeDef` DTO — declares a CiviCRM contact sub-type with required `name` and
+  `parentName` (base type: `Individual`, `Organization`, or `Household`) and optional `label`
+- `contactTypes[]` section in `SchemaDefinition` and `SchemaApplier` — idempotent
+  get-or-create of `ContactType` entities via `civicrm:apply-schema`
+- `ContactInput::$contactSubType` — optional field passed as `contact_sub_type` in
+  `toCiviValues()`; supported by `fromArray()` / `toArray()` round-trip and `SyncContactJob`
+
 ## [0.3.0] — 2026-06-09
 
 ### Added

@@ -269,6 +269,89 @@ it('passes option_group_id:name when field has optionGroup', function (): void {
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Option groups
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('creates option group and its values when neither exist', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [], 0);
+    $transport->addResponse('OptionGroup', 'create', [['id' => 5]], 1);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'create', [['id' => 11]], 1);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'create', [['id' => 12]], 1);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(SchemaDefinition::fromArray([
+        'optionGroups' => [
+            'event_type' => [
+                ['name' => 'webinar', 'label' => 'Webinar'],
+                ['name' => 'conference'],
+            ],
+        ],
+    ]));
+
+    expect($report->created)->toBe([
+        'OptionGroup:event_type',
+        'OptionValue:event_type.webinar',
+        'OptionValue:event_type.conference',
+    ])
+        ->and($transport->callsFor('OptionGroup', 'create'))->toHaveCount(1)
+        ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(2);
+});
+
+it('reports existing when option group and values already exist', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [['id' => 5]], 1);
+    $transport->addResponse('OptionValue', 'get', [['id' => 11]], 1);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(SchemaDefinition::fromArray([
+        'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+    ]));
+
+    expect($report->existing)->toBe(['OptionGroup:event_type', 'OptionValue:event_type.webinar'])
+        ->and($report->created)->toBe([])
+        ->and($transport->callsFor('OptionGroup', 'create'))->toHaveCount(0)
+        ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(0);
+});
+
+it('creates value when option group exists but value does not', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [['id' => 5]], 1);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'create', [['id' => 13]], 1);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(SchemaDefinition::fromArray([
+        'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+    ]));
+
+    expect($report->existing)->toBe(['OptionGroup:event_type'])
+        ->and($report->created)->toBe(['OptionValue:event_type.webinar'])
+        ->and($transport->callsFor('OptionGroup', 'create'))->toHaveCount(0)
+        ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(1);
+});
+
+it('dry-run marks option group and values as wouldCreate when absent', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+
+    $applier = makeApplier($transport);
+    $report  = $applier->apply(
+        SchemaDefinition::fromArray([
+            'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+        ]),
+        dryRun: true,
+    );
+
+    expect($report->wouldCreate)->toBe(['OptionGroup:event_type', 'OptionValue:event_type.webinar'])
+        ->and($transport->callsFor('OptionGroup', 'create'))->toHaveCount(0)
+        ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(0);
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Contact types
 // ──────────────────────────────────────────────────────────────────────────────
 

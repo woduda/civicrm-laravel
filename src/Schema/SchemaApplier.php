@@ -73,6 +73,38 @@ final readonly class SchemaApplier
             );
         }
 
+        foreach ($schema->optionGroups as $groupDef) {
+            $this->processEntity(
+                label: "OptionGroup:{$groupDef->name}",
+                exists: $this->entityExists('OptionGroup', 'name', $groupDef->name),
+                dryRun: $dryRun,
+                created: $created,
+                existing: $existing,
+                wouldCreate: $wouldCreate,
+                create: function () use ($groupDef): void {
+                    $this->client->entity('OptionGroup')->create(['name' => $groupDef->name]);
+                },
+            );
+
+            foreach ($groupDef->values as $def) {
+                $this->processEntity(
+                    label: "OptionValue:{$def->optionGroup}.{$def->name}",
+                    exists: $this->optionValueExists($def->optionGroup, $def->name),
+                    dryRun: $dryRun,
+                    created: $created,
+                    existing: $existing,
+                    wouldCreate: $wouldCreate,
+                    create: function () use ($def): void {
+                        $this->client->entity('OptionValue')->create([
+                            'option_group_id:name' => $def->optionGroup,
+                            'name'                 => $def->name,
+                            'label'                => $def->label ?? $def->name,
+                        ]);
+                    },
+                );
+            }
+        }
+
         foreach ($schema->optionValues as $def) {
             $this->processEntity(
                 label: "OptionValue:{$def->optionGroup}.{$def->name}",

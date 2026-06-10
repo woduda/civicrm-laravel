@@ -21,6 +21,7 @@ final readonly class SchemaDefinition
      * @param list<OptionValueDef>      $optionValues
      * @param list<string>              $groups
      * @param list<ContactTypeDef>      $contactTypes
+     * @param list<OptionGroupDef>      $optionGroups
      */
     public function __construct(
         public array $customGroups = [],
@@ -30,6 +31,7 @@ final readonly class SchemaDefinition
         public array $optionValues = [],
         public array $groups = [],
         public array $contactTypes = [],
+        public array $optionGroups = [],
     ) {}
 
     /**
@@ -46,6 +48,7 @@ final readonly class SchemaDefinition
             optionValues: self::parseOptionValues($data),
             groups: self::parseStringList($data, 'groups'),
             contactTypes: self::parseContactTypes($data),
+            optionGroups: self::parseOptionGroups($data),
         );
     }
 
@@ -152,6 +155,48 @@ final readonly class SchemaDefinition
                 );
             }
             $result[] = ContactTypeDef::fromArray($entry);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<mixed, mixed> $data
+     * @return list<OptionGroupDef>
+     */
+    private static function parseOptionGroups(array $data): array
+    {
+        if (!array_key_exists('optionGroups', $data)) {
+            return [];
+        }
+
+        if (!is_array($data['optionGroups'])) {
+            throw new ValidationException('Schema section "optionGroups" must be a mapping of group name to value list.');
+        }
+
+        $result = [];
+        foreach ($data['optionGroups'] as $groupName => $entries) {
+            if (!is_string($groupName) || $groupName === '') {
+                throw new ValidationException('optionGroups: each key must be a non-empty string group name.');
+            }
+
+            if (!is_array($entries)) {
+                throw new ValidationException(
+                    sprintf('optionGroups["%s"] must be a list of option value mappings.', $groupName),
+                );
+            }
+
+            $values = [];
+            foreach ($entries as $i => $entry) {
+                if (!is_array($entry)) {
+                    throw new ValidationException(
+                        sprintf('optionGroups["%s"][%s] must be an object/mapping.', $groupName, (string) $i),
+                    );
+                }
+                $values[] = OptionValueDef::fromArray(array_merge(['optionGroup' => $groupName], $entry));
+            }
+
+            $result[] = new OptionGroupDef(name: $groupName, values: $values);
         }
 
         return $result;

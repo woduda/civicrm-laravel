@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-06-10
+
+### Added
+- `OptionGroupDef` DTO — declares a CiviCRM option group together with the values it
+  should contain; parsed from the `optionGroups` mapping section in YAML
+- `optionGroups` section in `SchemaDefinition` and `SchemaApplier` — nested dict syntax
+  (`groupName → list<{name, label?}>`); the option group itself is created via
+  `OptionGroup.create` if it does not exist, then each value is ensured via the existing
+  `OptionValue` get-or-create path; dry-run and idempotency are fully supported
+- `resources/schema/example.yaml` updated with an `optionGroups` example
+
+### Fixed
+- `optionGroups` section in YAML was silently ignored by `SchemaDefinition::fromArray()`
+
 ## [0.5.0] — 2026-06-10
 
 ### Added

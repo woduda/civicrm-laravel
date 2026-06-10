@@ -113,6 +113,44 @@ it('throws ValidationException when customField is missing label', function (): 
     ]);
 })->throws(ValidationException::class, 'label');
 
+it('parses customField with optionGroup', function (): void {
+    $schema = SchemaDefinition::fromArray([
+        'customGroups' => [[
+            'name'    => 'VolunteerData',
+            'title'   => 'Volunteer Data',
+            'extends' => 'Contact',
+            'fields'  => [[
+                'name'        => 'event_category',
+                'label'       => 'Event Category',
+                'dataType'    => 'String',
+                'htmlType'    => 'Select',
+                'optionGroup' => 'event_type',
+            ]],
+        ]],
+    ]);
+
+    expect($schema->customGroups[0]->fields[0]->optionGroup)->toBe('event_type')
+        ->and($schema->customGroups[0]->fields[0]->optionValues)->toBe([]);
+});
+
+it('throws ValidationException when customField has both optionValues and optionGroup', function (): void {
+    SchemaDefinition::fromArray([
+        'customGroups' => [[
+            'name'    => 'VolunteerData',
+            'title'   => 'Volunteer Data',
+            'extends' => 'Contact',
+            'fields'  => [[
+                'name'         => 'event_category',
+                'label'        => 'Event Category',
+                'dataType'     => 'String',
+                'htmlType'     => 'Select',
+                'optionValues' => ['a', 'b'],
+                'optionGroup'  => 'event_type',
+            ]],
+        ]],
+    ]);
+})->throws(ValidationException::class, 'optionValues');
+
 it('parses contactTypes section', function (): void {
     $schema = SchemaDefinition::fromArray([
         'contactTypes' => [

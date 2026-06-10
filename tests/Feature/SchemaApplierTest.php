@@ -238,6 +238,36 @@ it('dry-run marks group and all fields as wouldCreate when group does not exist'
         ->and($transport->callsFor('CustomField', 'create'))->toHaveCount(0);
 });
 
+it('passes option_group_id:name when field has optionGroup', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('CustomGroup', 'get', [['id' => 7]], 1);
+    $transport->addResponse('CustomField', 'get', [], 0);
+    $transport->addResponse('CustomField', 'create', [['id' => 22]], 1);
+
+    $applier = makeApplier($transport);
+    $applier->apply(SchemaDefinition::fromArray([
+        'customGroups' => [[
+            'name'    => 'VolunteerData',
+            'title'   => 'Volunteer Data',
+            'extends' => 'Contact',
+            'fields'  => [[
+                'name'        => 'event_category',
+                'label'       => 'Event Category',
+                'dataType'    => 'String',
+                'htmlType'    => 'Select',
+                'optionGroup' => 'event_type',
+            ]],
+        ]],
+    ]));
+
+    $createCalls = $transport->callsFor('CustomField', 'create');
+    /** @var array<string, mixed> $values */
+    $values = $createCalls[0]['params']['values'];
+    expect($createCalls)->toHaveCount(1)
+        ->and($values['option_group_id:name'])->toBe('event_type')
+        ->and(array_key_exists('option_values', $values))->toBeFalse();
+});
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Contact types
 // ──────────────────────────────────────────────────────────────────────────────

@@ -10,8 +10,16 @@ customGroups:
         label: Volunteer Status
         dataType: String
         htmlType: Select
+        # Inline options — CiviCRM creates a private option group for this field.
         optionValues: [applied, active, inactive]
         # Line manager is a relationship (see RelationshipType below), not a plain field.
+      - name: event_category
+        label: Event Category
+        dataType: String
+        htmlType: Select
+        # Reference an existing CiviCRM option group instead of inline values.
+        # Mutually exclusive with optionValues.
+        optionGroup: event_type
       - name: start_date
         label: Start Date
         dataType: Date

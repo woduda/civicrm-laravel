@@ -172,6 +172,9 @@ final readonly class SchemaApplier
                         if ($fieldDef->optionValues !== []) {
                             $values['option_values'] = $fieldDef->optionValues;
                         }
+                        if ($fieldDef->optionGroup !== null) {
+                            $values['option_group_id:name'] = $fieldDef->optionGroup;
+                        }
                         $this->client->entity('CustomField')->create($values);
                     },
                 );

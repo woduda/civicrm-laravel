@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-10
+
+### Added
+- `CustomFieldDef::$optionGroup` — optional `string|null` field that references an existing
+  CiviCRM option group by name instead of defining inline `optionValues`; mutually exclusive
+  with `optionValues` (throws `ValidationException` when both are set); parsed from the
+  `optionGroup` key in YAML; `SchemaApplier` passes it to CiviCRM as `option_group_id:name`
+- `optionGroup` documented in `resources/schema/example.yaml` and README YAML-keys reference
+
 ## [0.4.0] — 2026-06-09
 
 ### Added

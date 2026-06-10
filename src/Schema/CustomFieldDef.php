@@ -13,6 +13,7 @@ final readonly class CustomFieldDef
 {
     /**
      * @param list<string> $optionValues Inline option values (used when htmlType is Select/Radio)
+     * @param string|null  $optionGroup  Name of an existing CiviCRM option group to reference instead of inline values
      */
     public function __construct(
         public string $name,
@@ -21,6 +22,7 @@ final readonly class CustomFieldDef
         public string $htmlType,
         public array $optionValues = [],
         public bool $isRequired = false,
+        public ?string $optionGroup = null,
     ) {}
 
     /**
@@ -57,6 +59,14 @@ final readonly class CustomFieldDef
             $optionValues[] = $v;
         }
 
+        $optionGroup = isset($data['optionGroup']) && is_string($data['optionGroup']) && $data['optionGroup'] !== ''
+            ? $data['optionGroup']
+            : null;
+
+        if ($optionGroup !== null && $optionValues !== []) {
+            throw new ValidationException('CustomField cannot have both "optionValues" and "optionGroup" set.');
+        }
+
         return new self(
             name: $name,
             label: $label,
@@ -64,6 +74,7 @@ final readonly class CustomFieldDef
             htmlType: $htmlType,
             optionValues: $optionValues,
             isRequired: (bool) ($data['isRequired'] ?? false),
+            optionGroup: $optionGroup,
         );
     }
 }

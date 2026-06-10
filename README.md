@@ -222,8 +222,13 @@ customGroups:
         label: Volunteer Status
         dataType: String         # String | Integer | Date | Boolean | Memo | Money | Float | Link
         htmlType: Select         # Text | Select | Radio | CheckBox | TextArea | Hidden | …
-        optionValues: [applied, active, inactive]   # inline options for Select/Radio
+        optionValues: [applied, active, inactive]   # inline options — CiviCRM creates a private option group
         isRequired: false        # default: false
+      - name: event_category
+        label: Event Category
+        dataType: String
+        htmlType: Select
+        optionGroup: event_type  # reference an existing option group (mutually exclusive with optionValues)
 
 # Bidirectional relationship types
 relationshipTypes:

@@ -14,6 +14,7 @@ final readonly class OptionGroupDef
      */
     public function __construct(
         public string $name,
+        public string $title,
         public array $values = [],
     ) {}
 }

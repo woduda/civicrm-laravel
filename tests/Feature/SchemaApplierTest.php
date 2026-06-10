@@ -285,18 +285,27 @@ it('creates option group and its values when neither exist', function (): void {
     $report  = $applier->apply(SchemaDefinition::fromArray([
         'optionGroups' => [
             'event_type' => [
-                ['name' => 'webinar', 'label' => 'Webinar'],
-                ['name' => 'conference'],
+                'title'  => 'Event Type',
+                'values' => [
+                    ['name' => 'webinar', 'label' => 'Webinar'],
+                    ['name' => 'conference'],
+                ],
             ],
         ],
     ]));
+
+    $groupCreateCalls = $transport->callsFor('OptionGroup', 'create');
+    /** @var array<string, mixed> $groupValues */
+    $groupValues = $groupCreateCalls[0]['params']['values'];
 
     expect($report->created)->toBe([
         'OptionGroup:event_type',
         'OptionValue:event_type.webinar',
         'OptionValue:event_type.conference',
     ])
-        ->and($transport->callsFor('OptionGroup', 'create'))->toHaveCount(1)
+        ->and($groupCreateCalls)->toHaveCount(1)
+        ->and($groupValues['name'])->toBe('event_type')
+        ->and($groupValues['title'])->toBe('Event Type')
         ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(2);
 });
 
@@ -307,7 +316,7 @@ it('reports existing when option group and values already exist', function (): v
 
     $applier = makeApplier($transport);
     $report  = $applier->apply(SchemaDefinition::fromArray([
-        'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+        'optionGroups' => ['event_type' => ['title' => 'Event Type', 'values' => [['name' => 'webinar']]]],
     ]));
 
     expect($report->existing)->toBe(['OptionGroup:event_type', 'OptionValue:event_type.webinar'])
@@ -324,7 +333,7 @@ it('creates value when option group exists but value does not', function (): voi
 
     $applier = makeApplier($transport);
     $report  = $applier->apply(SchemaDefinition::fromArray([
-        'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+        'optionGroups' => ['event_type' => ['title' => 'Event Type', 'values' => [['name' => 'webinar']]]],
     ]));
 
     expect($report->existing)->toBe(['OptionGroup:event_type'])
@@ -341,7 +350,7 @@ it('dry-run marks option group and values as wouldCreate when absent', function 
     $applier = makeApplier($transport);
     $report  = $applier->apply(
         SchemaDefinition::fromArray([
-            'optionGroups' => ['event_type' => [['name' => 'webinar']]],
+            'optionGroups' => ['event_type' => ['title' => 'Event Type', 'values' => [['name' => 'webinar']]]],
         ]),
         dryRun: true,
     );

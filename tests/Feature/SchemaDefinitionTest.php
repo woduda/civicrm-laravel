@@ -189,8 +189,11 @@ it('parses optionGroups section', function (): void {
     $schema = SchemaDefinition::fromArray([
         'optionGroups' => [
             'event_type' => [
-                ['name' => 'webinar', 'label' => 'Webinar'],
-                ['name' => 'conference'],
+                'title'  => 'Event Type',
+                'values' => [
+                    ['name' => 'webinar', 'label' => 'Webinar'],
+                    ['name' => 'conference'],
+                ],
             ],
         ],
     ]);
@@ -198,6 +201,7 @@ it('parses optionGroups section', function (): void {
     expect($schema->optionGroups)->toHaveCount(1)
         ->and($schema->optionGroups[0])->toBeInstanceOf(OptionGroupDef::class)
         ->and($schema->optionGroups[0]->name)->toBe('event_type')
+        ->and($schema->optionGroups[0]->title)->toBe('Event Type')
         ->and($schema->optionGroups[0]->values)->toHaveCount(2)
         ->and($schema->optionGroups[0]->values[0]->optionGroup)->toBe('event_type')
         ->and($schema->optionGroups[0]->values[0]->name)->toBe('webinar')
@@ -206,11 +210,22 @@ it('parses optionGroups section', function (): void {
         ->and($schema->optionGroups[0]->values[1]->label)->toBeNull();
 });
 
+it('parses optionGroups with no values key', function (): void {
+    $schema = SchemaDefinition::fromArray([
+        'optionGroups' => [
+            'event_type' => ['title' => 'Event Type'],
+        ],
+    ]);
+
+    expect($schema->optionGroups[0]->title)->toBe('Event Type')
+        ->and($schema->optionGroups[0]->values)->toBe([]);
+});
+
 it('parses multiple groups in optionGroups section', function (): void {
     $schema = SchemaDefinition::fromArray([
         'optionGroups' => [
-            'group_a' => [['name' => 'val1']],
-            'group_b' => [['name' => 'val2'], ['name' => 'val3', 'label' => 'Three']],
+            'group_a' => ['title' => 'Group A', 'values' => [['name' => 'val1']]],
+            'group_b' => ['title' => 'Group B', 'values' => [['name' => 'val2'], ['name' => 'val3', 'label' => 'Three']]],
         ],
     ]);
 
@@ -228,12 +243,16 @@ it('throws ValidationException when optionGroups is not a mapping', function ():
     SchemaDefinition::fromArray(['optionGroups' => 'not-a-mapping']);
 })->throws(ValidationException::class, 'optionGroups');
 
-it('throws ValidationException when optionGroups entry is not a list', function (): void {
-    SchemaDefinition::fromArray(['optionGroups' => ['event_type' => 'not-a-list']]);
+it('throws ValidationException when optionGroups entry is not an object', function (): void {
+    SchemaDefinition::fromArray(['optionGroups' => ['event_type' => 'not-an-object']]);
 })->throws(ValidationException::class, 'optionGroups["event_type"]');
 
+it('throws ValidationException when optionGroups entry is missing title', function (): void {
+    SchemaDefinition::fromArray(['optionGroups' => ['event_type' => ['values' => []]]]);
+})->throws(ValidationException::class, 'title');
+
 it('throws ValidationException when optionGroups value entry is missing name', function (): void {
-    SchemaDefinition::fromArray(['optionGroups' => ['event_type' => [['label' => 'Webinar']]]]);
+    SchemaDefinition::fromArray(['optionGroups' => ['event_type' => ['title' => 'T', 'values' => [['label' => 'Webinar']]]]]);
 })->throws(ValidationException::class, 'name');
 
 it('parses optionValues section', function (): void {

@@ -53,13 +53,15 @@ groups:
   - Marketing consent
 
 # Option groups with their values — the group is created if it does not exist.
-# Each key is the option group machine name; the value is a list of option values.
+# Each key is the machine name; title is required.
 optionGroups:
   event_type:
-    - name: webinar
-      label: Webinar
-    - name: conference
-      label: Conference
+    title: Event Type
+    values:
+      - name: webinar
+        label: Webinar
+      - name: conference
+        label: Conference
 
 # Contact sub-types — must reference a base type (Individual, Organization, Household).
 contactTypes:

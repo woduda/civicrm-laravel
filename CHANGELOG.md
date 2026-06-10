@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-06-10
+
+### Fixed
+- `optionGroups` YAML format now requires a `title` field and uses a `values` key for the
+  option value list (`groupName → {title, values?}`) — CiviCRM's `OptionGroup.create` API
+  requires `title`; passing only `name` caused a server-side validation error
+- `SchemaApplier` now passes `title` to `OptionGroup.create`
+- `SchemaDefinition` parser throws `ValidationException` with a clear message when `title`
+  is absent from an `optionGroups` entry
+
 ## [0.6.0] — 2026-06-10
 
 ### Added

@@ -175,14 +175,28 @@ final readonly class SchemaDefinition
         }
 
         $result = [];
-        foreach ($data['optionGroups'] as $groupName => $entries) {
+        foreach ($data['optionGroups'] as $groupName => $groupData) {
             if (!is_string($groupName) || $groupName === '') {
                 throw new ValidationException('optionGroups: each key must be a non-empty string group name.');
             }
 
+            if (!is_array($groupData)) {
+                throw new ValidationException(
+                    sprintf('optionGroups["%s"] must be an object/mapping with at least a "title" key.', $groupName),
+                );
+            }
+
+            if (!isset($groupData['title']) || !is_string($groupData['title']) || $groupData['title'] === '') {
+                throw new ValidationException(
+                    sprintf('optionGroups["%s"] is missing required field "title".', $groupName),
+                );
+            }
+
+            $entries = $groupData['values'] ?? [];
+
             if (!is_array($entries)) {
                 throw new ValidationException(
-                    sprintf('optionGroups["%s"] must be a list of option value mappings.', $groupName),
+                    sprintf('optionGroups["%s"].values must be a list of option value mappings.', $groupName),
                 );
             }
 
@@ -190,13 +204,13 @@ final readonly class SchemaDefinition
             foreach ($entries as $i => $entry) {
                 if (!is_array($entry)) {
                     throw new ValidationException(
-                        sprintf('optionGroups["%s"][%s] must be an object/mapping.', $groupName, (string) $i),
+                        sprintf('optionGroups["%s"].values[%s] must be an object/mapping.', $groupName, (string) $i),
                     );
                 }
                 $values[] = OptionValueDef::fromArray(array_merge(['optionGroup' => $groupName], $entry));
             }
 
-            $result[] = new OptionGroupDef(name: $groupName, values: $values);
+            $result[] = new OptionGroupDef(name: $groupName, title: $groupData['title'], values: $values);
         }
 
         return $result;

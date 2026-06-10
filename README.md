@@ -249,13 +249,15 @@ activityTypes:
   - Materials sent
 
 # Option groups with their values — group is created if it does not exist.
-# Keys are option group machine names; values are lists of option value mappings.
+# Each key is the machine name; title is required.
 optionGroups:
   event_type:
-    - name: webinar
-      label: Webinar             # optional; defaults to name
-    - name: conference
-      label: Conference
+    title: Event Type            # required human label
+    values:                      # optional list of option values
+      - name: webinar
+        label: Webinar           # optional; defaults to name
+      - name: conference
+        label: Conference
 
 # Option values added to an already-existing option group (flat list alternative)
 optionValues:

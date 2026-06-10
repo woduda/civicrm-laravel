@@ -82,7 +82,10 @@ final readonly class SchemaApplier
                 existing: $existing,
                 wouldCreate: $wouldCreate,
                 create: function () use ($groupDef): void {
-                    $this->client->entity('OptionGroup')->create(['name' => $groupDef->name]);
+                    $this->client->entity('OptionGroup')->create([
+                        'name'  => $groupDef->name,
+                        'title' => $groupDef->title,
+                    ]);
                 },
             );
 

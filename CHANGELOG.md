@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-06-13
+
+### Fixed
+- `OptionValue.create` now passes `value: name` (defaulting to the option's `name` when
+  not set explicitly), preventing CiviCRM from auto-assigning sequential integers (1, 2, 3…)
+  as stored values — which would force the `:name` suffix on every APIv4 custom-field write
+- `OptionValueDef` accepts an optional `value` field; it can be set explicitly in both the
+  `optionGroups.values` and `optionValues` YAML sections
+
 ## [0.6.1] — 2026-06-10
 
 ### Fixed

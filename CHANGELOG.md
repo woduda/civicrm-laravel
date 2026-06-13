@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.6.2] — 2026-06-13
+## [0.7.0] — 2026-06-13
 
 ### Fixed
 - `OptionValue.create` now passes `value: name` (defaulting to the option's `name` when

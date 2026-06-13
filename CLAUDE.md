@@ -8,7 +8,7 @@ an optional transactional outbox, artisan commands (apply-schema, test-connectio
 webhook verification middleware, and a `CiviCrm::fake()` test double.
 Depends on woduda/civicrm-php ^0.7.
 
-Current release: **0.6.2**. Schema sections supported by `civicrm:apply-schema`:
+Current release: **0.7.0**. Schema sections supported by `civicrm:apply-schema`:
 `customGroups`, `relationshipTypes`, `tags`, `activityTypes`, `optionGroups`,
 `optionValues`, `groups`, `contactTypes`.
 

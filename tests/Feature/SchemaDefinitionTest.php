@@ -265,5 +265,33 @@ it('parses optionValues section', function (): void {
     expect($schema->optionValues)->toHaveCount(1)
         ->and($schema->optionValues[0]->optionGroup)->toBe('event_type')
         ->and($schema->optionValues[0]->name)->toBe('webinar')
-        ->and($schema->optionValues[0]->label)->toBe('Webinar');
+        ->and($schema->optionValues[0]->label)->toBe('Webinar')
+        ->and($schema->optionValues[0]->value)->toBeNull();
+});
+
+it('parses explicit value field in optionValues section', function (): void {
+    $schema = SchemaDefinition::fromArray([
+        'optionValues' => [
+            ['optionGroup' => 'volunteer_status', 'name' => 'candidate', 'value' => 'candidate'],
+        ],
+    ]);
+
+    expect($schema->optionValues[0]->value)->toBe('candidate');
+});
+
+it('parses explicit value field in optionGroups values', function (): void {
+    $schema = SchemaDefinition::fromArray([
+        'optionGroups' => [
+            'volunteer_status' => [
+                'title'  => 'Volunteer Status',
+                'values' => [
+                    ['name' => 'candidate', 'value' => 'candidate'],
+                    ['name' => 'active'],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($schema->optionGroups[0]->values[0]->value)->toBe('candidate')
+        ->and($schema->optionGroups[0]->values[1]->value)->toBeNull();
 });

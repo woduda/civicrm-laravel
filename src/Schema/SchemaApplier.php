@@ -102,6 +102,7 @@ final readonly class SchemaApplier
                             'option_group_id:name' => $def->optionGroup,
                             'name'                 => $def->name,
                             'label'                => $def->label ?? $def->name,
+                            'value'                => $def->value ?? $def->name,
                         ]);
                     },
                 );
@@ -121,6 +122,7 @@ final readonly class SchemaApplier
                         'option_group_id:name' => $def->optionGroup,
                         'name'                 => $def->name,
                         'label'                => $def->label ?? $def->name,
+                        'value'                => $def->value ?? $def->name,
                     ]);
                 },
             );

@@ -15,6 +15,7 @@ final readonly class OptionValueDef
         public string $optionGroup,
         public string $name,
         public ?string $label = null,
+        public ?string $value = null,
     ) {}
 
     /**
@@ -35,6 +36,7 @@ final readonly class OptionValueDef
             optionGroup: $optionGroup,
             name: $name,
             label: isset($data['label']) && is_string($data['label']) ? $data['label'] : null,
+            value: isset($data['value']) && is_string($data['value']) ? $data['value'] : null,
         );
     }
 }

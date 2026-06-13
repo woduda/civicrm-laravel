@@ -342,6 +342,40 @@ it('creates value when option group exists but value does not', function (): voi
         ->and($transport->callsFor('OptionValue', 'create'))->toHaveCount(1);
 });
 
+it('passes value=name when no explicit value is set for optionGroups value', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [['id' => 5]], 1);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'create', [['id' => 13]], 1);
+
+    $applier = makeApplier($transport);
+    $applier->apply(SchemaDefinition::fromArray([
+        'optionGroups' => ['volunteer_status' => ['title' => 'Volunteer Status', 'values' => [['name' => 'candidate']]]],
+    ]));
+
+    $createCalls = $transport->callsFor('OptionValue', 'create');
+    /** @var array<string, mixed> $values */
+    $values = $createCalls[0]['params']['values'];
+    expect($values['value'])->toBe('candidate');
+});
+
+it('passes explicit value when set for optionGroups value', function (): void {
+    $transport = new TestTransport();
+    $transport->addResponse('OptionGroup', 'get', [['id' => 5]], 1);
+    $transport->addResponse('OptionValue', 'get', [], 0);
+    $transport->addResponse('OptionValue', 'create', [['id' => 13]], 1);
+
+    $applier = makeApplier($transport);
+    $applier->apply(SchemaDefinition::fromArray([
+        'optionGroups' => ['volunteer_status' => ['title' => 'Volunteer Status', 'values' => [['name' => 'candidate', 'value' => 'my_custom_val']]]],
+    ]));
+
+    $createCalls = $transport->callsFor('OptionValue', 'create');
+    /** @var array<string, mixed> $values */
+    $values = $createCalls[0]['params']['values'];
+    expect($values['value'])->toBe('my_custom_val');
+});
+
 it('dry-run marks option group and values as wouldCreate when absent', function (): void {
     $transport = new TestTransport();
     $transport->addResponse('OptionGroup', 'get', [], 0);

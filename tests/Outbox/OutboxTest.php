@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Woduda\CiviCRM\CiviCrmClient;
+use Woduda\CiviCRM\Exception\AuthenticationException;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -163,6 +164,35 @@ it('immediately fails an entry on ValidationException without retrying', functio
     ]);
 
     app()->instance(CiviCrmClient::class, outboxClient(new TestTransport()));
+
+    $exitCode = Artisan::call('civicrm:outbox:work');
+
+    expect($exitCode)->toBe(0)
+        ->and(Artisan::output())->toContain('Processed 1: 0 done, 1 failed');
+
+    $entry = OutboxEntry::firstOrFail();
+    expect($entry->status)->toBe('failed')
+        ->and($entry->attempts)->toBe(1);
+});
+
+// ---------------------------------------------------------------------------
+// ProcessOutboxCommand — AuthenticationException → immediate permanent failure
+// ---------------------------------------------------------------------------
+
+it('immediately fails an entry on AuthenticationException without retrying', function (): void {
+    $transport = new TestTransport();
+    $transport->willThrow(new AuthenticationException('401 Unauthorized', 401));
+
+    OutboxEntry::create([
+        'uuid'         => (string) Str::uuid(),
+        'type'         => 'sync_contact',
+        'payload'      => ['contact_input' => (new ContactInput(email: 'auth@example.org'))->toArray()],
+        'status'       => 'pending',
+        'attempts'     => 0,
+        'available_at' => now()->subSecond(),
+    ]);
+
+    app()->instance(CiviCrmClient::class, outboxClient($transport));
 
     $exitCode = Artisan::call('civicrm:outbox:work');
 

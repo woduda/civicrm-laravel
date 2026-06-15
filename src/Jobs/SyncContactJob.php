@@ -14,7 +14,7 @@ use Illuminate\Queue\SerializesModels;
 use Psr\Http\Client\ClientExceptionInterface;
 use Woduda\CiviCRM\CiviCrmClient;
 use Woduda\CiviCRM\Entity\Contact;
-use Woduda\CiviCRM\Exception\ApiException;
+use Woduda\CiviCRM\Exception\ApiErrorException;
 use Woduda\CiviCRM\Query\GetQuery;
 use Woduda\CiviCRM\Query\Operator;
 
@@ -95,7 +95,7 @@ class SyncContactJob implements ShouldQueue, ShouldBeUnique
     /**
      * Upserts the contact in CiviCRM, then applies tags, groups, and custom fields.
      *
-     * @throws ApiException             On CiviCRM HTTP 4xx/5xx errors
+     * @throws ApiErrorException        On CiviCRM HTTP 4xx/5xx errors
      * @throws ClientExceptionInterface On transport-level errors
      */
     public function handle(CiviCrmClient $client): void

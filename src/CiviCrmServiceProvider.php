@@ -12,12 +12,14 @@ use CiviCrm\Laravel\Outbox\OutboxRepository;
 use CiviCrm\Laravel\Schema\SchemaApplier;
 use Illuminate\Contracts\Foundation\Application;
 use Psr\Http\Client\ClientInterface;
+use Psr\Log\LoggerInterface;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Woduda\CiviCRM\CiviCrmClient;
 use Woduda\CiviCRM\Client;
 use Woduda\CiviCRM\Config;
 use Woduda\CiviCRM\Http\Transport;
+use Woduda\CiviCRM\Retry\ExponentialBackoff;
 
 class CiviCrmServiceProvider extends PackageServiceProvider
 {
@@ -77,10 +79,20 @@ class CiviCrmServiceProvider extends PackageServiceProvider
             return new CiviCrmClient(new Transport(new Client($config, $psrClient)));
         }
 
-        // Retry support pending woduda/civicrm-php PR #11 (ExponentialBackoff not in v0.7).
-        // When that lands: if class_exists(ExponentialBackoff::class) && config('civicrm.retry.enabled')
-        // inject the strategy into the transport before returning.
+        $retry = null;
+        if (config('civicrm.retry.enabled')) {
+            $maxAttempts = config('civicrm.retry.max_attempts', 3);
+            $baseDelayMs = config('civicrm.retry.base_delay_ms', 200);
+            $retry = new ExponentialBackoff(
+                maxAttempts: is_int($maxAttempts) ? $maxAttempts : 3,
+                baseDelayMs: is_int($baseDelayMs) ? $baseDelayMs : 200,
+            );
+        }
 
-        return CiviCrmClient::create($config);
+        $logger = $app->bound(LoggerInterface::class)
+            ? $app->make(LoggerInterface::class)
+            : null;
+
+        return new CiviCrmClient(Transport::createDefault($config, $retry, $logger));
     }
 }

@@ -7,7 +7,7 @@ namespace CiviCrm\Laravel\Console;
 use Illuminate\Console\Command;
 use Psr\Http\Client\ClientExceptionInterface;
 use Woduda\CiviCRM\CiviCrmClient;
-use Woduda\CiviCRM\Exception\ApiException;
+use Woduda\CiviCRM\Exception\ApiErrorException;
 
 /**
  * Verifies connectivity to the configured CiviCRM instance.
@@ -19,7 +19,7 @@ final class TestConnectionCommand extends Command
     protected $description = 'Verify connectivity to the configured CiviCRM instance';
 
     /**
-     * @throws ApiException             On CiviCRM HTTP error responses
+     * @throws ApiErrorException        On CiviCRM HTTP error responses
      * @throws ClientExceptionInterface On transport-level errors
      */
     public function handle(CiviCrmClient $client): int
@@ -30,7 +30,7 @@ final class TestConnectionCommand extends Command
 
         try {
             $client->raw('Contact', 'get', ['limit' => 1]);
-        } catch (ApiException $e) {
+        } catch (ApiErrorException $e) {
             $this->error(sprintf('API error [%d]: %s', $e->getCode(), $e->getMessage()));
 
             return self::FAILURE;

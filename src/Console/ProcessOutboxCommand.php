@@ -11,6 +11,7 @@ use CiviCrm\Laravel\Outbox\OutboxEntry;
 use CiviCrm\Laravel\Outbox\OutboxRepository;
 use Illuminate\Console\Command;
 use Woduda\CiviCRM\CiviCrmClient;
+use Woduda\CiviCRM\Exception\AuthenticationException;
 use Woduda\CiviCRM\Exception\ValidationException;
 
 /**
@@ -131,10 +132,7 @@ class ProcessOutboxCommand extends Command
             return true;
         }
 
-        // Forward-compatibility guard: AuthenticationException planned for a future
-        // woduda/civicrm-php release. See CLAUDE.md backward-compat pattern.
-        return class_exists('Woduda\\CiviCRM\\Exception\\AuthenticationException')
-            && $e instanceof \Woduda\CiviCRM\Exception\AuthenticationException;
+        return $e instanceof AuthenticationException;
     }
 
     /**

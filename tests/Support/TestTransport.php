@@ -22,6 +22,16 @@ final class TestTransport implements TransportInterface
     /** @var list<array{entity: string, action: string, params: array<string, mixed>}> */
     public array $calls = [];
 
+    private ?\Throwable $nextException = null;
+
+    /**
+     * Makes the next send() call throw the given exception.
+     */
+    public function willThrow(\Throwable $e): void
+    {
+        $this->nextException = $e;
+    }
+
     /**
      * Enqueues a canned response for the next `send($entity, $action, ...)` call.
      *
@@ -40,12 +50,19 @@ final class TestTransport implements TransportInterface
     /**
      * @param array<string, mixed> $params
      *
-     * @throws \RuntimeException Never thrown — always returns a response.
+     * @throws \Throwable When willThrow() was called before this send().
      */
     #[\Override]
     public function send(string $entity, string $action, array $params = []): ApiResponse
     {
         $this->calls[] = ['entity' => $entity, 'action' => $action, 'params' => $params];
+
+        if ($this->nextException instanceof \Throwable) {
+            $e = $this->nextException;
+            $this->nextException = null;
+
+            throw $e;
+        }
 
         $key = $entity . '.' . $action;
 

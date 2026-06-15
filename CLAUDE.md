@@ -6,9 +6,9 @@ Thin, idiomatic Laravel adapter around `woduda/civicrm-php` (PSR-18 CiviCRM APIv
 client). Provides: container bindings, a `CiviCrm` facade, queueable idempotent jobs,
 an optional transactional outbox, artisan commands (apply-schema, test-connection),
 webhook verification middleware, and a `CiviCrm::fake()` test double.
-Depends on woduda/civicrm-php ^0.7.
+Depends on woduda/civicrm-php ^1.0.
 
-Current release: **0.7.0**. Schema sections supported by `civicrm:apply-schema`:
+Current release: **0.8.0**. Schema sections supported by `civicrm:apply-schema`:
 `customGroups`, `relationshipTypes`, `tags`, `activityTypes`, `optionGroups`,
 `optionValues`, `groups`, `contactTypes`.
 
@@ -46,9 +46,9 @@ Current release: **0.7.0**. Schema sections supported by `civicrm:apply-schema`:
   tag "civicrm-migrations"
 - Register a middleware alias "civicrm.webhook"
 - Schedule-friendly commands (no interactive prompts when --no-interaction)
-- Backward-compatible: guard optional core features with class_exists()/interface_exists()
-  so the package still installs against woduda/civicrm-php 0.7 even before retry/webhook
-  land in the core lib
+- Requires woduda/civicrm-php ^1.0; retry (`ExponentialBackoff`) and enriched exceptions
+  (`AuthenticationException`, `RateLimitException`, `TransportException`) are available
+  unconditionally — no `class_exists()` guards needed
 
 ## Quality gates (MUST pass before every commit)
 

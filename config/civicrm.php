@@ -20,8 +20,7 @@ return [
     'verify_tls' => env('CIVICRM_VERIFY_TLS', true),
 
     /*
-     * Retry configuration — honoured once woduda/civicrm-php PR #11 (ExponentialBackoff)
-     * lands in the core library. Guarded with class_exists() in the provider.
+     * Retry configuration — uses ExponentialBackoff from woduda/civicrm-php.
      */
     'retry' => [
         'enabled'       => env('CIVICRM_RETRY', false),

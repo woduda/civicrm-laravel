@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-06-15
+
+### Changed
+- Bumped `woduda/civicrm-php` requirement from `^0.7` to `^1.0`
+- Replaced deprecated `ApiException` alias with `ApiErrorException` in all catch blocks
+  and `@throws` PHPDoc (`SyncContactJob`, `CreateActivityJob`, `TestConnectionCommand`)
+- `CiviCrmServiceProvider` now wires `ExponentialBackoff` retry and PSR-3 logging into
+  `Transport::createDefault()` when `civicrm.retry.enabled` is `true`; previously this
+  was a TODO comment guarded against the missing class in `^0.7`
+- `ProcessOutboxCommand::isPermanentFailure()` now imports and checks
+  `AuthenticationException` directly instead of via a `class_exists()` forward-compat
+  guard; `AuthenticationException` causes immediate permanent failure of an outbox entry
+- `TestTransport` gains `willThrow(Throwable)` to support testing transport-level
+  exceptions in job/command tests
+
 ## [0.7.0] — 2026-06-13
 
 ### Fixed

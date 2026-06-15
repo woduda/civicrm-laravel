@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Psr\Http\Client\ClientExceptionInterface;
 use Woduda\CiviCRM\CiviCrmClient;
-use Woduda\CiviCRM\Exception\ApiException;
+use Woduda\CiviCRM\Exception\ApiErrorException;
 
 /**
  * Queues creation of a CiviCRM activity linked to a contact.
@@ -84,7 +84,7 @@ class CreateActivityJob implements ShouldQueue, ShouldBeUnique
     /**
      * Creates the activity in CiviCRM via logForContact.
      *
-     * @throws ApiException             On CiviCRM HTTP 4xx/5xx errors
+     * @throws ApiErrorException        On CiviCRM HTTP 4xx/5xx errors
      * @throws ClientExceptionInterface On transport-level errors
      */
     public function handle(CiviCrmClient $client): void
